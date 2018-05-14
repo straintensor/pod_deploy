@@ -1,0 +1,37 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ${NAME}
+spec:
+ # hostIPC: true
+  containers:
+  - name: empty-container
+    image: docker.io/ak3636/deeplearning:latest
+    imagePullPolicy: Always
+    resources:
+      limits:
+        ${MEM_LIMIT}
+      requests:
+        ${MEM_REQ}
+      
+    command: ${CMD}
+    args: ${ARGS}
+    volumeMounts:
+    - name: ssh-secret-volume
+      mountPath: "/root/ssh_mount"
+      
+    - mountPath: /dev/shm
+      name: dshm
+  restartPolicy: Never
+  nodeSelector:
+    ${NODE_HOSTNAME}
+  volumes:
+    - name: dshm
+      emptyDir: 
+        medium: Memory
+        
+    - name: ssh-secret-volume
+      secret:
+        ${SSH_KEY_NAME}
+             
+        

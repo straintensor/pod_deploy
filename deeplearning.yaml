@@ -1,0 +1,59 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ${NAME}
+spec:
+ # hostIPC: true
+  containers:
+  - name: deeplearning-container
+    tty: true
+    image: docker.io/ak3636/deeplearning:latest
+    imagePullPolicy: Always
+
+         
+    #env:
+    #- name: MESSAGE
+      #value: "hello world"
+      
+      #command: ["/bin/sleep"]
+      #"/hooks/startup.sh"
+    command: ${CMD}
+    args: ${ARGS}
+    lifecycle:
+      #postStart:
+        #exec:
+          #command: ["/bin/sleep", "1"]
+      preStop:
+        exec:
+          command: ["/hooks/stop.sh"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        ${MEM_LIMIT}
+      requests:
+        nvidia.com/gpu: 1
+        ${MEM_REQ}
+
+    volumeMounts:
+
+    - name: ssh-secret-volume
+      mountPath: "/root/ssh_mount"
+    - mountPath: /dev/shm
+      name: dshm
+      
+
+      
+  nodeSelector:
+    ${NODE_HOSTNAME}
+  restartPolicy: Never
+
+  volumes:
+
+    - name: ssh-secret-volume
+      secret:
+        ${SSH_KEY_NAME}
+             
+
+    - name: dshm
+      emptyDir: 
+        medium: Memory
